@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Translator Pro</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --container-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #2d3436;
+            --input-bg: #ffffff;
+            --border-color: #eee;
+        }
+
+        /* Dark Mode වර්ණ */
+        .dark-mode {
+            --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --container-bg: rgba(30, 30, 50, 0.95);
+            --text-color: #e0e0e0;
+            --input-bg: #0f3460;
+            --border-color: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+            transition: all 0.5s ease;
+        }
+
+        .container {
+            background: var(--container-bg);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            animation: slideUp 0.8s ease-out; /* පෙනී සිටීමේ ඇනිමේෂන් එක */
+        }
+
+        /* පෙනී සිටීමේ ඇනිමේෂන් එක */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        h2 { color: #a29bfe; margin: 0; font-size: 22px; }
+
+        /* Dark Mode Switch */
+        .theme-toggle {
+            cursor: pointer;
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: 0.3s;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            border-color: #a29bfe;
+            transform: scale(1.02); /* ටයිප් කරන විට පොඩි විශාල වීමක් */
+        }
+
+        button#btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button#btn:hover {
+            letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .output-container {
+            margin-top: 20px;
+            background: rgba(0,0,0,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            position: relative;
+            min-height: 50px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: #a29bfe;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* Loading Animation */
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .2em 0 0 rgba(0,0,0,0), .4em 0 0 rgba(0,0,0,0); }
+            40% { color: white; text-shadow: .2em 0 0 rgba(0,0,0,0), .4em 0 0 rgba(0,0,0,0); }
+            60% { text-shadow: .2em 0 0 white, .4em 0 0 rgba(0,0,0,0); }
+            80%, 100% { text-shadow: .2em 0 0 white, .4em 0 0 white; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h2>Translator</h2>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Mode</button>
+    </div>
+    
+    <textarea id="fromText" placeholder="මෙහි ලියන්න..."></textarea>
+    
+    <select id="langSelect">
+        <option value="en|si">🇺🇸 English → 🇱🇰 සිංහල</option>
+        <option value="si|en">🇱🇰 සිංහල → 🇺🇸 English</option>
+    </select>
+    
+    <button onclick="translateText()" id="btn">පරිවර්තනය කරන්න</button>
+    
+    <div class="output-container">
+        <button class="copy-btn" onclick="copyResult()">Copy</button>
+        <div id="toText" style="margin-top: 10px;">පරිවර්තනය මෙතැනින්...</div>
+    </div>
+</div>
+
+<script>
+    // Dark Mode මාරු කිරීම
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const btn = document.querySelector('.theme-toggle');
+        if(document.body.classList.contains('dark-mode')) {
+            btn.innerText = "☀️ Light";
+        } else {
+            btn.innerText = "🌙 Dark";
+        }
+    }
+
+    async function translateText() {
+        const text = document.getElementById("fromText").value;
+        const langPair = document.getElementById("langSelect").value;
+        const outputDiv = document.getElementById("toText");
+        const btn = document.getElementById("btn");
+
+        if(!text.trim()) return;
+
+        btn.innerHTML = '<span class="loading-dots">පරිවර්තනය වේ</span>';
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
+            const data = await response.json();
+            
+            // Output එක පෙන්වන විට කුඩා fade-in animation එකක්
+            outputDiv.style.opacity = 0;
+            setTimeout(() => {
+                outputDiv.innerText = data.responseData.translatedText;
+                outputDiv.style.opacity = 1;
+                outputDiv.style.transition = "0.5s";
+            }, 200);
+
+        } catch (error) {
+            outputDiv.innerText = "Error: සම්බන්ධතාවය පරීක්ෂා කරන්න.";
+        } finally {
+            btn.innerText = "පරිවර්තනය කරන්න";
+            btn.disabled = false;
+        }
+    }
+
+    function copyResult() {
+        const text = document.getElementById("toText").innerText;
+        navigator.clipboard.writeText(text);
+        const copyBtn = document.querySelector('.copy-btn');
+        copyBtn.innerText = "Done!";
+        setTimeout(() => copyBtn.innerText = "Copy", 2000);
+    }
+</script>
+
+</body>
+</html>
