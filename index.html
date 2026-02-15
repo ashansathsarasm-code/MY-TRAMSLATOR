@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Professional Translator</title>
+    <title>Modern Translator Pro</title>
     <style>
-        /* සයිට් එක ලස්සන කරන CSS */
+        /* මූලික පෙනුම සකස් කිරීම */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
+
         .container {
             background: white;
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 90%;
+            width: 100%;
             max-width: 450px;
             text-align: center;
         }
+
         h2 { color: #333; margin-bottom: 20px; }
+
         textarea {
             width: 100%;
             height: 120px;
@@ -35,31 +39,30 @@
             font-size: 16px;
             resize: none;
             margin-bottom: 15px;
-            transition: 0.3s;
         }
-        textarea:focus { border-color: #764ba2; outline: none; }
-        select, button {
+
+        select, .btn {
             width: 100%;
             padding: 12px;
             margin-bottom: 10px;
             border-radius: 10px;
-            border: 1px solid #ddd;
+            border: none;
             font-size: 16px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .btn-translate {
-            background-color: #764ba2;
-            color: white;
-            border: none;
-        }
+
+        /* බොත්තම් වල වර්ණ */
+        .btn-translate { background-color: #764ba2; color: white; }
         .btn-translate:hover { background-color: #5a368a; }
-        .btn-copy {
-            background-color: #28a745;
-            color: white;
-            border: none;
-        }
+
+        .btn-speak { background-color: #ff9800; color: white; }
+        .btn-speak:hover { background-color: #e68a00; }
+
+        .btn-copy { background-color: #28a745; color: white; }
         .btn-copy:hover { background-color: #218838; }
+
         .output-box {
             background: #f8f9fa;
             padding: 15px;
@@ -69,6 +72,7 @@
             text-align: left;
             color: #444;
             margin-top: 10px;
+            margin-bottom: 15px;
             word-wrap: break-word;
         }
     </style>
@@ -81,70 +85,72 @@
     <textarea id="fromText" placeholder="පරිවර්තනය කිරීමට මෙහි ලියන්න..."></textarea>
     
     <select id="langSelect">
-        <optgroup label="ප්‍රධාන භාෂා">
-            <option value="en|si">English to Sinhala</option>
-            <option value="si|en">Sinhala to English</option>
-            <option value="si|ta">Sinhala to Tamil (දෙමළ)</option>
-            <option value="en|ta">English to Tamil</option>
-        </optgroup>
-        <optgroup label="ලෝක භාෂා">
-            <option value="en|hi">English to Hindi (හින්දි)</option>
-            <option value="en|ja">English to Japanese (ජපන්)</option>
-            <option value="en|fr">English to French (ප්‍රංශ)</option>
-            <option value="en|ko">English to Korean (කොරියානු)</option>
-            <option value="en|ar">English to Arabic (අරාබි)</option>
-        </optgroup>
+        <option value="en|si">English to Sinhala</option>
+        <option value="si|en">Sinhala to English</option>
+        <option value="si|ta">Sinhala to Tamil</option>
+        <option value="en|ta">English to Tamil</option>
+        <option value="en|ja">English to Japanese</option>
     </select>
     
-    <button class="btn-translate" onclick="translateText()" id="btn">Translate / පරිවර්තනය කරන්න</button>
+    <button class="btn btn-translate" onclick="translateText()" id="btn">Translate / පරිවර්තනය කරන්න</button>
     
     <div id="toText" class="output-box">පරිවර්තනය මෙතැනින්...</div>
     
-    <button class="btn-copy" onclick="copyText()">Copy Text (පිටපත් කරන්න)</button>
+    <button class="btn btn-speak" onclick="speakText()">🔊 Listen (අහන්න)</button>
+    <button class="btn btn-copy" onclick="copyText()">📄 Copy Text (පිටපත් කරන්න)</button>
 </div>
 
 <script>
+    // 1. පරිවර්තනය කිරීමේ function එක
     async function translateText() {
         const text = document.getElementById("fromText").value;
         const langPair = document.getElementById("langSelect").value;
         const outputDiv = document.getElementById("toText");
         const btn = document.getElementById("btn");
 
-        if(!text) {
-            alert("කරුණාකර වචනයක් ඇතුළත් කරන්න!");
-            return;
-        }
+        if(!text) { alert("කරුණාකර වචනයක් ඇතුළත් කරන්න!"); return; }
 
         btn.innerText = "පරිවර්තනය වෙමින් පවතී...";
         
         try {
             const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
             const data = await response.json();
-            
-            if(data.responseData.translatedText) {
-                outputDiv.innerText = data.responseData.translatedText;
-            } else {
-                outputDiv.innerText = "පරිවර්තනය කිරීමට නොහැකි විය.";
-            }
+            outputDiv.innerText = data.responseData.translatedText;
         } catch (error) {
-            outputDiv.innerText = "Error: සම්බන්ධතාවය පරීක්ෂා කරන්න.";
+            outputDiv.innerText = "සම්බන්ධතාවය පරීක්ෂා කරන්න.";
         } finally {
             btn.innerText = "Translate / පරිවර්තනය කරන්න";
         }
     }
 
+    // 2. කටහඬින් කියවීමේ function එක
+    function speakText() {
+        const text = document.getElementById("toText").innerText;
+        const langPair = document.getElementById("langSelect").value;
+        const targetLang = langPair.split("|")[1]; 
+
+        if (text === "පරිවර්තනය මෙතැනින්..." || text === "") return;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // භාෂාවට අනුව voice එක සැකසීම
+        if (targetLang === "si") utterance.lang = 'si-LK';
+        else if (targetLang === "ta") utterance.lang = 'ta-IN';
+        else utterance.lang = 'en-US';
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 3. කොපි කිරීමේ function එක
     function copyText() {
         const text = document.getElementById("toText").innerText;
-        if(text === "පරිවර්තනය මෙතැනින්..." || text === "") {
-            alert("කොපි කිරීමට දෙයක් නැත!");
-            return;
-        }
+        if(text === "පරිවර්තනය මෙතැනින්...") return;
+        
         navigator.clipboard.writeText(text).then(() => {
-            alert("සාර්ථකව පිටපත් කරගත්තා! (Copied)");
+            alert("සාර්ථකව පිටපත් කරගත්තා!");
         });
     }
 </script>
 
 </body>
 </html>
-
